@@ -1,0 +1,19 @@
+# Build output
+dist/
+*.exe
+*.apk
+windows/obj/
+
+# Android / Gradle
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+.idea/
+*.iml
+
+# Signing keys (never commit)
+*.jks
+*.keystore
+signing.properties

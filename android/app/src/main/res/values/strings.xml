@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Claude Monitor</string>
+    <string name="title">Claude Usage</string>
+    <string name="widget_desc">Limiti di 5 ore e settimanali dei tuoi account Claude</string>
+    <string name="empty">Nessun account collegato.\nPremi + per accedere con il tuo account Claude.</string>
+    <string name="widget_empty">Apri l\'app e premi + per collegare un account</string>
+    <string name="footer">Aggiornamento automatico ogni 15 min · tieni premuto un account per rimuoverlo</string>
+    <string name="add">Aggiungi account</string>
+    <string name="pin_widget">Aggiungi widget alla home</string>
+    <string name="refresh">Aggiorna</string>
+</resources>
