@@ -96,6 +96,18 @@
         </LinearLayout>
     </ScrollView>
 
+    <Switch
+        android:id="@+id/notify_reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="4dp"
+        android:text="@string/notify_reset"
+        android:textColor="@color/text"
+        android:textSize="14sp" />
+
     <TextView
         android:id="@+id/pin_widget"
         android:layout_width="wrap_content"

@@ -16,6 +16,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import kotlin.concurrent.thread
@@ -27,6 +28,7 @@ class MainActivity : Activity() {
     private lateinit var empty: TextView
     private lateinit var addButton: View
     private lateinit var pinWidget: View
+    private lateinit var notifySwitch: Switch
     private var demo = false
     private val handler = Handler(Looper.getMainLooper())
     private val tick = object : Runnable {
@@ -52,6 +54,11 @@ class MainActivity : Activity() {
         pinWidget = findViewById(R.id.pin_widget)
         pinWidget.setOnClickListener {
             AppWidgetManager.getInstance(this).requestPinAppWidget(ComponentName(this, UsageWidget::class.java), null, null)
+        }
+        notifySwitch = findViewById(R.id.notify_reset)
+        notifySwitch.setOnCheckedChangeListener { _, on ->
+            Notify.setEnabled(this, on)
+            if (on && !Notify.permitted(this)) requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
         }
         findViewById<TextView>(R.id.update_banner).setOnClickListener { Updater.install(this) }
         findViewById<TextView>(R.id.footer).text = "v${Updater.currentVersion(this)} · " + getString(R.string.footer)
@@ -100,8 +107,13 @@ class MainActivity : Activity() {
         Bus.changed(this)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (!Notify.permitted(this)) notifySwitch.isChecked = false
+    }
+
     override fun onStart() {
         super.onStart()
+        notifySwitch.isChecked = Notify.enabled(this) && Notify.permitted(this)
         Bus.listener = { render() }
         handler.post(tick)
         if (demo) return

@@ -35,6 +35,7 @@
 - **Limiti**: sessione di 5 ore, settimana e, quando presenti, i limiti settimanali Sonnet e Opus, con percentuale, barra e orario di reset. La barra diventa rossa dal 90%.
 - **Windows**: un solo `.exe` da ~45 KB, nessuna installazione. Resta nell'area di notifica, con le percentuali nel tooltip. Opzioni: sempre in primo piano, avvio con Windows (anche ridotta nel tray).
 - **Android**: app da ~60 KB con **widget per la home** ridimensionabile. Aggiornamento automatico ogni 15 minuti, anche dopo il riavvio.
+- **Notifica al reset**: se la attivi (Android: interruttore nella schermata principale; Windows: menu ⚙ o tray), ricevi una notifica quando un limite in uso si azzera.
 - **Aggiornamenti integrati**: entrambe le app controllano le nuove versioni nelle release di questo repository e si aggiornano con un clic.
 
 ## Installazione

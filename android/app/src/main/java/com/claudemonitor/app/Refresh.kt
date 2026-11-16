@@ -44,7 +44,9 @@ object Refresher {
             for (a in list) {
                 if (a.accessToken == DEMO_TOKEN) continue
                 try {
+                    val old = a.limits
                     Api.usage(a)
+                    Notify.limitsReset(ctx, a, Notify.resetLimits(old, a.limits, System.currentTimeMillis()))
                     a.error = null
                     a.updated = System.currentTimeMillis()
                 } catch (e: ApiException) {

@@ -215,6 +215,7 @@ namespace ClaudeMonitor
         static readonly string FilePath = Path.Combine(Store.Dir, "settings.json");
         public static bool TopMost;
         public static bool StartInTray = true;
+        public static bool NotifyReset;
 
         public static void Load()
         {
@@ -224,6 +225,7 @@ namespace ClaudeMonitor
                 var d = Json.Parse(File.ReadAllText(FilePath, Encoding.UTF8));
                 TopMost = Json.Str(d, "top_most") == "True";
                 StartInTray = Json.Str(d, "start_in_tray") != "False";
+                NotifyReset = Json.Str(d, "notify_reset") == "True";
             }
             catch { }
         }
@@ -234,7 +236,7 @@ namespace ClaudeMonitor
             {
                 Directory.CreateDirectory(Store.Dir);
                 File.WriteAllText(FilePath, Json.Write(new Dictionary<string, object> {
-                    { "top_most", TopMost }, { "start_in_tray", StartInTray } }), Encoding.UTF8);
+                    { "top_most", TopMost }, { "start_in_tray", StartInTray }, { "notify_reset", NotifyReset } }), Encoding.UTF8);
             }
             catch { }
         }
@@ -785,7 +787,7 @@ namespace ClaudeMonitor
             if (update != null && FooterRect().Contains(e.Location)) InstallUpdate();
         }
 
-        // Same three options in the gear menu and in the tray menu; check marks are re-read on every opening.
+        // Same options in the gear menu and in the tray menu; check marks are re-read on every opening.
         void AddSettingsItems(ContextMenuStrip m)
         {
             var top = new ToolStripMenuItem("Sempre in primo piano") { CheckOnClick = true };
@@ -802,11 +804,15 @@ namespace ClaudeMonitor
             m.Items.Add(top);
             m.Items.Add(auto);
             m.Items.Add(hidden);
+            var notify = new ToolStripMenuItem("Notifica quando un limite si azzera") { CheckOnClick = true };
+            notify.Click += delegate { Settings.NotifyReset = notify.Checked; Settings.Save(); };
+            m.Items.Add(notify);
             m.Opening += delegate
             {
                 top.Checked = Settings.TopMost;
                 auto.Checked = IsAutostart();
                 hidden.Checked = Settings.StartInTray;
+                notify.Checked = Settings.NotifyReset;
             };
         }
 
@@ -892,7 +898,14 @@ namespace ClaudeMonitor
                 try
                 {
                     bool changed;
+                    var old = a.Limits;
                     a.Limits = Api.Usage(a, out changed);
+                    var reset = ResetLimits(old, a.Limits, DateTimeOffset.Now);
+                    if (Settings.NotifyReset && reset.Count > 0)
+                    {
+                        string text = a.Email + ": " + string.Join(", ", reset.ConvertAll(l => l.Label)) + " di nuovo disponibile.";
+                        try { BeginInvoke((MethodInvoker)delegate { tray.ShowBalloonTip(5000, "Limite azzerato", text, ToolTipIcon.Info); }); } catch { }
+                    }
                     a.Error = null;
                     a.Updated = DateTime.Now;
                     if (changed) SaveAccounts();
@@ -900,6 +913,18 @@ namespace ClaudeMonitor
                 catch (Exception ex) { a.Error = ex.Message; }
                 a.Loading = false;
                 try { BeginInvoke((MethodInvoker)Relayout); } catch { }
+            });
+        }
+
+        // Limits that were in use and whose reset time passed since the previous refresh.
+        // The new reset must differ, so a server that has not rolled over yet is not reported twice.
+        static List<Limit> ResetLimits(List<Limit> old, List<Limit> now, DateTimeOffset at)
+        {
+            return old.FindAll(o =>
+            {
+                if (o.Pct <= 0 || !o.Reset.HasValue || o.Reset.Value > at) return false;
+                var n = now.Find(x => x.Label == o.Label);
+                return n == null || n.Reset != o.Reset;
             });
         }
 

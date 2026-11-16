@@ -9,4 +9,5 @@
     <string name="add">Aggiungi account</string>
     <string name="pin_widget">Aggiungi widget alla home</string>
     <string name="refresh">Aggiorna</string>
+    <string name="notify_reset">Notifica quando un limite si azzera</string>
 </resources>
